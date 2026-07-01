@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Ultra-Premium Neumorphic Interface</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CORE DESIGN SYSTEM & VARIABLES --- */
+        :root[data-theme="dark"] {
+            --bg-base: #13161c;
+            --card-bg: #181c24;
+            --input-bg: #151820;
+            --text-primary: #f3f4f6;
+            --text-secondary: #8a94a6;
+            --accent-color: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            
+            /* High-fidelity Dark Neumorphic Shadow Matrices */
+            --shadow-outer: 12px 12px 24px #0b0d12, -12px -12px 24px #212732;
+            --shadow-outer-sm: 6px 6px 12px #0b0d12, -6px -6px 12px #212732;
+            --shadow-inner: inset 4px 4px 8px #0b0d12, inset -4px -4px 8px #212732;
+            --shadow-btn-active: inset 6px 6px 12px #0b0d12, inset -6px -6px 12px #212732;
+            --border-glass: rgba(255, 255, 255, 0.04);
+            --glass-reflection: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+        }
+
+        :root[data-theme="light"] {
+            --bg-base: #eef2f7;
+            --card-bg: #eef2f7;
+            --input-bg: #e6ebf3;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-color: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.25);
+            --accent-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            
+            /* High-fidelity Light Neumorphic Shadow Matrices */
+            --shadow-outer: 14px 14px 28px #cbd5e1, -14px -14px 28px #ffffff;
+            --shadow-outer-sm: 7px 7px 14px #cbd5e1, -7px -7px 14px #ffffff;
+            --shadow-inner: inset 5px 5px 10px #cbd5e1, inset -5px -5px 10px #ffffff;
+            --shadow-btn-active: inset 6px 6px 12px #cbd5e1, inset -6px -6px 12px #ffffff;
+            --border-glass: rgba(255, 255, 255, 0.6);
+            --glass-reflection: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+        }
+
+        /* --- LAYOUT RESET & BASE SCALING --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: 'Plus Jakarta Sans', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: background 0.6s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s ease;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        /* --- AMBIENT KINETIC BACKGROUND --- */
+        .ambient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .gradient-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.45;
+            mix-blend-mode: screen;
+            animation: drift 25s infinite alternate ease-in-out;
+        }
+        [data-theme="light"] .gradient-blob {
+            mix-blend-mode: multiply;
+            opacity: 0.18;
+            filter: blur(140px);
+        }
+
+        .blob-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #3b82f6 0%, rgba(59,130,246,0) 70%);
+            top: -10%;
+            left: -10%;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #8b5cf6 0%, rgba(139,92,246,0) 70%);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #10b981 0%, rgba(16,185,129,0) 70%);
+            top: 40%;
+            left: 50%;
+            animation-delay: -10s;
+        }
+
+        canvas#particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+        }
+
+        /* --- THEME TOGGLE FLOATER --- */
+        .theme-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            box-shadow: var(--shadow-outer-sm);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .theme-toggle:hover {
+            transform: scale(1.08) rotate(15deg);
+        }
+        .theme-toggle:active {
+            box-shadow: var(--shadow-inner);
+            transform: scale(0.95);
+        }
+
+        /* --- LUXURY INTERFACE CONTAINER --- */
+        .login-container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            z-index: 10;
+            border-radius: 40px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow-outer);
+            border: 1px solid var(--border-glass);
+            transform-style: preserve-3d;
+            animation: cardEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            background: var(--glass-reflection);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* --- BRANDING / LOGO SECTION --- */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .logo-ring-wrapper {
+            position: relative;
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+            animation: spinRing 4s linear infinite;
+        }
+
+        .logo-core {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: var(--input-bg);
+            box-shadow: var(--shadow-outer-sm);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .logo-core::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: lightSweep 6s infinite ease-in-out;
+        }
+
+        .logo-section h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
+        }
+
+        .logo-section p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* --- FORM ELEMENTS & INTERACTIVE STATES --- */
+        .form-group {
+            position: relative;
+            margin-bottom: 1.8rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 18px;
+            background: var(--input-bg);
+            box-shadow: var(--shadow-inner);
+            transition: all 0.4s ease;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 1.2rem 1.2rem 1.2rem 3.2rem;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        /* Floating Label Logic */
+        .form-group label {
+            position: absolute;
+            left: 3.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 1rem;
+        }
+
+        .input-wrapper input:focus ~ label,
+        .input-wrapper input:not(:placeholder-shown) ~ label {
+            top: -10px;
+            left: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            background: var(--card-bg);
+            padding: 0 6px;
+            border-radius: 4px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper input:focus ~ .input-icon {
+            color: var(--accent-color);
+        }
+
+        /* Glow border outline transition on focus */
+        .input-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            border: 2px solid var(--accent-color);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .input-wrapper.focused::after {
+            opacity: 1;
+        }
+
+        /* Password Specific Options */
+        .password-toggle {
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 5;
+        }
+        .password-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        /* Password Strength Diagnostics */
+        .strength-container {
+            display: flex;
+            gap: 4px;
+            margin-top: 0.6rem;
+            padding: 0 4px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.4s ease;
+        }
+        .strength-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .strength-bar {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(128,128,128,0.2);
+            transition: background 0.4s ease;
+        }
+
+        /* Alerts & Warnings */
+        .caps-warning {
+            position: absolute;
+            right: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: #f59e0b;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- ACCESSORY ROW (REMEMBER / FORGOT) --- */
+        .accessory-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: var(--input-bg);
+            box-shadow: var(--shadow-inner);
+            margin-right: 0.6rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .custom-checkbox i {
+            font-size: 0.75rem;
+            color: white;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .remember-me:hover .custom-checkbox {
+            background: var(--card-bg);
+            box-shadow: var(--shadow-outer-sm);
+        }
+
+        #remember-input:checked + .custom-checkbox {
+            background: var(--accent-gradient);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        #remember-input:checked + .custom-checkbox i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .forgot-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            position: relative;
+            font-weight: 500;
+        }
+        .forgot-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background: var(--accent-gradient);
+            transition: width 0.3s ease;
+        }
+        .forgot-link:hover {
+            color: var(--text-primary);
+        }
+        .forgot-link:hover::after {
+            width: 100%;
+        }
+
+        /* --- CINEMATIC MORPHING CTA --- */
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow-outer);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-outer), 0 10px 20px rgba(0,0,0,0.15);
+            color: #ffffff;
+            background: var(--accent-gradient);
+            border-color: transparent;
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-inner);
+        }
+
+        /* Button State Internals */
+        .btn-text, .btn-loader, .btn-success {
+            position: absolute;
+            transition: all 0.4s ease;
+        }
+
+        .btn-loader, .btn-success {
+            opacity: 0;
+            transform: scale(0.6);
+            pointer-events: none;
+        }
+
+        /* Morph Animation Triggers */
+        .submit-btn.loading {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: transparent;
+            background: var(--input-bg);
+            box-shadow: var(--shadow-inner);
+            pointer-events: none;
+        }
+        .submit-btn.loading .btn-text { opacity: 0; transform: scale(0.6); }
+        .submit-btn.loading .btn-loader { opacity: 1; transform: scale(1); }
+
+        .submit-btn.success {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #10b981 !important;
+            box-shadow: 0 0 20px rgba(16,185,129,0.6);
+            border-color: transparent;
+            pointer-events: none;
+        }
+        .submit-btn.success .btn-text { opacity: 0; }
+        .submit-btn.success .btn-loader { opacity: 0; }
+        .submit-btn.success .btn-success { opacity: 1; transform: scale(1); color: white;}
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spinRing 0.8s infinite linear;
+        }
+
+        /* --- PREMIUM OAUTH / SOCIAL INTEGRATIONS --- */
+        .social-divider {
+            display: flex;
+            align-items: center;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .social-divider::before, .social-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--text-secondary);
+            opacity: 0.2;
+        }
+        .social-divider span { padding: 0 15px; }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .social-btn {
+            height: 52px;
+            border-radius: 14px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow-outer-sm);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-outer);
+            color: var(--accent-color);
+        }
+        .social-btn:active {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-inner);
+        }
+
+        /* --- SIGN UP INVITATION FOOTER --- */
+        .footer-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .footer-text a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 4px;
+            transition: opacity 0.2s ease;
+        }
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- ADVANCED AFTER EFFECTS ANIMATION STRUCTS --- */
+        @keyframes cardEntrance {
+            0% { opacity: 0; transform: translateY(40px) rotateX(-10deg); }
+            100% { opacity: 1; transform: translateY(0) rotateX(0deg); }
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(8%, 12%) scale(1.15); }
+        }
+
+        @keyframes spinRing {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes lightSweep {
+            0% { left: -50%; top: -50%; }
+            40%, 100% { left: 100%; top: 100%; }
+        }
+
+        @keyframes UI-Shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .shake-error {
+            animation: UI-Shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+            border-color: rgba(239, 68, 68, 0.5) !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.2), var(--shadow-outer) !important;
+        }
+
+        /* --- ULTRAPRO RESPONSIVE LAYOUT MATRIX (4K/8K ready) --- */
+        @media(max-width: 540px) {
+            .login-container { padding: 2rem 1.5rem; margin: 1rem; }
+            .social-grid { gap: 8px; }
+            .social-btn { height: 46px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg">
+        <div class="gradient-blob blob-1"></div>
+        <div class="gradient-blob blob-2"></div>
+        <div class="gradient-blob blob-3"></div>
+        <canvas id="particleCanvas"></canvas>
+    </div>
+
+    <div class="theme-toggle" id="themeToggleBtn" title="Toggle UI Universe Materials">
+        <i class="fa-solid fa-moon"></i>
+    </div>
+
+    <div class="login-container" id="loginCard">
+        
+        <div class="logo-section">
+            <div class="logo-ring-wrapper">
+                <div class="logo-ring"></div>
+                <div class="logo-core">
+                    <i class="fa-solid fa-cubes-technological"></i>
+                </div>
+            </div>
+            <h1>Welcome Back</h1>
+            <p>Access your quantum dashboard ecosystem</p>
+        </div>
+
+        <form id="authForm" onsubmit="handleFormSubmission(event)" novalidate>
+            
+            <div class="form-group">
+                <div class="input-wrapper" id="emailFieldWrapper">
+                    <i class="fa-regular fa-envelope input-icon"></i>
+                    <input type="email" id="emailInput" placeholder=" " required autocomplete="off">
+                    <label for="emailInput">Corporate Email</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper" id="passwordFieldWrapper">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" id="passwordInput" placeholder=" " required>
+                    <label for="passwordInput">Secure Code</label>
+                    <div class="caps-warning" id="capsWarning">
+                        <i class="fa-solid fa-arrow-up-capslock"></i> Caps
+                    </div>
+                    <i class="fa-regular fa-eye password-toggle" id="passToggleIcon" onclick="togglePasswordVisibility()"></i>
+                </div>
+                
+                <div class="strength-container" id="strengthMeter">
+                    <div class="strength-bar"></div>
+                    <div class="strength-bar"></div>
+                    <div class="strength-bar"></div>
+                    <div class="strength-bar"></div>
+                </div>
+            </div>
+
+            <div class="accessory-row">
+                <label class="remember-me">
+                    <input type="checkbox" id="remember-input" style="display:none;">
+                    <div class="custom-checkbox">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <span>Remember Node</span>
+                </label>
+                <a href="#" class="forgot-link">Lost Credentials?</a>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-text">Authorize Security Access</span>
+                <div class="btn-loader"><div class="spinner"></div></div>
+                <div class="btn-success"><i class="fa-solid fa-circle-check fa-2xl"></i></div>
+            </button>
+
+        </form>
+
+        <div class="social-divider">
+            <span>Or Connect Via Neural Networks</span>
+        </div>
+        <div class="social-grid">
+            <div class="social-btn" title="Authorize with Apple"><i class="fa-brands fa-apple"></i></div>
+            <div class="social-btn" title="Authorize with Google"><i class="fa-brands fa-google"></i></div>
+            <div class="social-btn" title="Authorize with GitHub"><i class="fa-brands fa-github"></i></div>
+            <div class="social-btn" title="Authorize with Microsoft"><i class="fa-brands fa-microsoft"></i></div>
+            <div class="social-btn" title="Authorize with LinkedIn"><i class="fa-brands fa-linkedin-in"></i></div>
+        </div>
+
+        <div class="footer-text">
+            New to this Matrix? <a href="#">Create Core Profile</a>
+        </div>
+
+    </div>
+
+    <script>
+        // --- PERSISTENT THEME SWITCHER ENGINE ---
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const htmlElement = document.documentElement;
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlElement.setAttribute('data-theme', targetTheme);
+            themeToggleBtn.innerHTML = targetTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        // --- DESIGN INTERACTION UTILITIES: WRAPPER FOCUS SHIFT ---
+        const inputs = document.querySelectorAll('.input-wrapper input');
+        inputs.forEach(input => {
+            const wrapper = input.parentElement;
+            input.addEventListener('focus', () => wrapper.classList.add('focused'));
+            input.addEventListener('blur', () => wrapper.classList.remove('focused'));
+        });
+
+        // --- PASSWORD VISIBILITY SHIFTER ---
+        const passwordInput = document.getElementById('passwordInput');
+        const passToggleIcon = document.getElementById('passToggleIcon');
+
+        function togglePasswordVisibility() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passToggleIcon.className = 'fa-regular fa-eye-slash password-toggle';
+            } else {
+                passwordInput.type = 'password';
+                passToggleIcon.className = 'fa-regular fa-eye password-toggle';
+            }
+        }
+
+        // --- ADVANCED CAPS LOCK DETECTION SYSTEM ---
+        const capsWarning = document.getElementById('capsWarning');
+        window.addEventListener('keyup', (e) => {
+            if (e.getModifierState && e.getModifierState('CapsLock')) {
+                if(document.activeElement === passwordInput) {
+                    capsWarning.style.display = 'flex';
+                }
+            } else {
+                capsWarning.style.display = 'none';
+            }
+        });
+        passwordInput.addEventListener('blur', () => capsWarning.style.display = 'none');
+
+        // --- LIVE METRIC STRENGTH DIAGNOSTICS FOR PASSWORD ---
+        const strengthMeter = document.getElementById('strengthMeter');
+        const bars = document.querySelectorAll('.strength-bar');
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+            if(val.length === 0) {
+                strengthMeter.classList.remove('visible');
+                return;
+            }
+            
+            strengthMeter.classList.add('visible');
+            let assessmentScore = 0;
+            if (val.length >= 6) assessmentScore++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) assessmentScore++;
+            if (/[0-9]/.test(val)) assessmentScore++;
+            if (/[^A-Za-z0-9]/.test(val)) assessmentScore++;
+
+            // Map UI Feedback Matrix Elements
+            bars.forEach((bar, index) => {
+                if (index < assessmentScore) {
+                    if (assessmentScore <= 2) bar.style.background = '#ef4444'; // Fragile State
+                    else if (assessmentScore === 3) bar.style.background = '#f59e0b'; // Moderate State
+                    else bar.style.background = '#10b981'; // Fortified State
+                } else {
+                    bar.style.background = 'rgba(128,128,128,0.2)';
+                }
+            });
+        });
+
+        // --- FORM TRANSACTION MORPH LOGIC SUBMISSION ---
+        const loginCard = document.getElementById('loginCard');
+        const submitBtn = document.getElementById('submitBtn');
+        const emailInput = document.getElementById('emailInput');
+
+        function handleFormSubmission(event) {
+            event.preventDefault();
+
+            // Strip current error configuration profiles
+            loginCard.classList.remove('shake-error');
+
+            // Form structural validation verification
+            const isEmailValid = emailInput.value.includes('@') && emailInput.value.length > 5;
+            const isPasswordValid = passwordInput.value.length >= 4;
+
+            if (!isEmailValid || !isPasswordValid) {
+                // Instantly execute an After Effects standard error profile loop
+                void loginCard.offsetWidth; // Reflow reset trigger
+                loginCard.classList.add('shake-error');
+                return;
+            }
+
+            // Morph into pristine cryptographic operation state 
+            submitBtn.classList.add('loading');
+
+            // Simulate High-Performance Architecture Validation Delay Protocol
+            setTimeout(() => {
+                submitBtn.classList.remove('loading');
+                submitBtn.classList.add('success');
+                
+                // Complete luxury exit transition animation logic routine
+                setTimeout(() => {
+                    loginCard.style.transform = 'scale(0.92) rotateX(10deg)';
+                    loginCard.style.opacity = '0';
+                    loginCard.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+                    alert('Access Authorized. Initializing Sandbox Environments...');
+                }, 1000);
+
+            }, 2400);
+        }
+
+        // --- AMBIENT PARALLAX FLOATING PARTICLE ENGINE ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particlePool = [];
+
+        function setCanvasContextBounds() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', setCanvasContextBounds);
+        setCanvasContextBounds();
+
+        class AmbientParticle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+            renderUpdate() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = htmlElement.getAttribute('data-theme') === 'dark' ? '#ffffff' : '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function populatePoolStructure() {
+            particlePool = [];
+            const targetedDensity = Math.min(60, window.innerWidth / 24);
+            for(let idx=0; idx < targetedDensity; idx++) {
+                particlePool.push(new AmbientParticle());
+            }
+        }
+        populatePoolStructure();
+
+        function stepKineticsPipelineLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlePool.forEach(p => p.renderUpdate());
+            requestAnimationFrame(stepKineticsPipelineLoop);
+        }
+        stepKineticsPipelineLoop();
+
+        // High End Device Parallax Acceleration Integration
+        window.addEventListener('mousemove', (e) => {
+            const shiftX = (window.innerWidth / 2 - e.clientX) * 0.015;
+            const shiftY = (window.innerHeight / 2 - e.clientY) * 0.015;
+            loginCard.style.transform = `translate3d(${shiftX}px, ${shiftY}px, 0)`;
+        });
+    </script>
+</body>
+</html>
